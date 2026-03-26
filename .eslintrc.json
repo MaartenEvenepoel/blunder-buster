@@ -1,0 +1,55 @@
+{
+  "env": {
+    "browser": true,
+    "webextensions": true,
+    "es2022": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-undef": "error",
+    "no-console": "off",
+    "eqeqeq": ["error", "always"],
+    "no-var": "error",
+    "prefer-const": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["content/**/*.js"],
+      "parserOptions": {
+        "sourceType": "script"
+      },
+      "env": {
+        "browser": true,
+        "webextensions": true,
+        "es2022": true
+      },
+      "globals": {
+        "observeGameEnd": "readonly",
+        "extractGameId": "readonly",
+        "extractUsername": "readonly",
+        "extractGameDate": "readonly"
+      }
+    },
+    {
+      "files": ["scripts/**/*.js"],
+      "parserOptions": {
+        "sourceType": "script",
+        "ecmaVersion": 2022
+      },
+      "env": {
+        "node": true,
+        "browser": false,
+        "webextensions": false
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "node_modules/",
+    "lib/",
+    "engine/stockfish-worker.js"
+  ]
+}

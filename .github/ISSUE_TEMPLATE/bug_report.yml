@@ -1,0 +1,75 @@
+name: Bug report
+description: Something is not working correctly
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill in as much detail as you can — it makes diagnosing the issue much faster.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug.
+      placeholder: "e.g. The board shows pieces in the wrong positions after navigating to move 12."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: How can we reliably trigger this?
+      placeholder: |
+        1. Go to chess.com and finish a game
+        2. Open the side panel
+        3. Click on move 12 in the move list
+        4. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      placeholder: "e.g. The board should show the position after move 12."
+    validations:
+      required: true
+
+  - type: input
+    id: game_url
+    attributes:
+      label: Chess.com game URL (if applicable)
+      description: Paste the URL of the game where the issue occurred. Public games only — private games cannot be fetched.
+      placeholder: "https://www.chess.com/game/live/..."
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+      placeholder: "e.g. Chrome 125.0.6422.112"
+    validations:
+      required: true
+
+  - type: input
+    id: extension_version
+    attributes:
+      label: Extension version
+      description: Found on the `chrome://extensions` page under the Blunder Buster card.
+      placeholder: "e.g. 1.0.0"
+
+  - type: textarea
+    id: console_errors
+    attributes:
+      label: Console errors
+      description: |
+        Open the side panel, right-click anywhere in it, choose **Inspect**, go to the **Console** tab, and paste any red errors here.
+        For content script errors, open DevTools on the chess.com tab (F12) and check the Console there too.
+      render: text
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Screenshots, screen recordings, or any other context that might help.

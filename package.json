@@ -1,0 +1,38 @@
+{
+  "name": "blunder-buster",
+  "version": "1.0.0",
+  "description": "Chrome extension that analyses chess.com games locally with Stockfish — no account, no subscription, no data leaves your browser.",
+  "author": "Maarten Evenepoel",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MaartenEvenepoel/blunder-buster.git"
+  },
+  "homepage": "https://github.com/MaartenEvenepoel/blunder-buster#readme",
+  "bugs": {
+    "url": "https://github.com/MaartenEvenepoel/blunder-buster/issues"
+  },
+  "keywords": [
+    "chess",
+    "chess.com",
+    "chrome-extension",
+    "stockfish",
+    "game-analysis",
+    "browser-extension"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.js",
+    "lint": "eslint .",
+    "validate": "node scripts/validate.js"
+  },
+  "dependencies": {
+    "chess.js": "^1.1.0",
+    "stockfish": "^16.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  }
+}

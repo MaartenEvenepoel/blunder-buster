@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blunder Buster</title>
+  <link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Welcome screen (shown until a game is loaded) ── -->
+  <div id="welcome">
+    <h1>Blunder Buster</h1>
+    <p>Finish a game on chess.com and the analysis will appear here automatically.</p>
+    <p style="font-size:11px;color:#555;margin-top:8px;">You can also click the extension icon on any chess.com game page.</p>
+  </div>
+
+  <!-- ── Analysis UI (hidden until a game is loaded) ── -->
+  <div id="analysis-ui" style="display:none;flex-direction:column;height:100%;overflow:hidden;flex:1;">
+
+    <!-- Header: player names + accuracy -->
+    <div id="header">
+      <div class="player-row" id="row-black">
+        <span>
+          <span class="player-name" id="black-name">Black</span>
+          <span class="player-rating" id="black-rating"></span>
+        </span>
+        <span class="accuracy-score black" id="black-accuracy"></span>
+      </div>
+      <div id="opening-name"></div>
+      <div class="player-row" id="row-white">
+        <span>
+          <span class="player-name" id="white-name">White</span>
+          <span class="player-rating" id="white-rating"></span>
+        </span>
+        <span class="accuracy-score white" id="white-accuracy"></span>
+      </div>
+    </div>
+
+    <!-- Board + eval bar -->
+    <div id="board-area">
+      <div id="eval-bar-container"></div>
+      <div id="board-container">
+        <canvas id="board"></canvas>
+        <!-- Promotion picker is injected here by board.js -->
+      </div>
+    </div>
+
+    <!-- Deviation banner -->
+    <div id="deviation-banner">
+      <span>Exploring alternative line</span>
+      <button id="btn-return-to-game">Return to game</button>
+    </div>
+
+    <!-- Navigation -->
+    <div id="controls">
+      <button class="ctrl-btn" id="btn-start"  title="Go to start">&#x23EE;</button>
+      <button class="ctrl-btn" id="btn-prev"   title="Previous move">&#x23F4;</button>
+      <button class="ctrl-btn" id="btn-next"   title="Next move">&#x23F5;</button>
+      <button class="ctrl-btn" id="btn-end"    title="Go to end">&#x23ED;</button>
+      <button class="ctrl-btn" id="btn-flip"   title="Flip board">&#x21C5; Flip</button>
+    </div>
+
+    <!-- Move list -->
+    <div id="move-list-wrapper">
+      <div id="move-list"></div>
+    </div>
+
+    <!-- Status / progress -->
+    <div id="status-bar">
+      <span id="status-text">Ready</span>
+      <div id="progress-bar-wrap">
+        <div id="progress-bar"></div>
+      </div>
+    </div>
+
+  </div><!-- /#analysis-ui -->
+
+</div><!-- /#app -->
+
+<script type="module" src="sidepanel.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+name: Feature request
+description: Suggest an improvement or new capability
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Feature requests are welcome. Please check the existing issues first to avoid duplicates.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the situation that prompted this request. What are you trying to do that is currently difficult or impossible?
+      placeholder: "e.g. After analysing a game I want to share the annotated PGN with a friend, but there is no way to export it."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe the feature you have in mind. Rough ideas are fine — you don't need a complete spec.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Are there other approaches or workarounds you have tried or considered?
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Which part of the extension does this affect?
+      options:
+        - Game detection (chess.com integration)
+        - Game fetching / API
+        - Stockfish analysis
+        - Move classification
+        - Chessboard UI
+        - Move list / navigation
+        - Evaluation bar
+        - Deviation / exploration mode
+        - Caching / storage
+        - Setup / installation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Mockups, links to similar features in other tools, or anything else that helps explain the request.
