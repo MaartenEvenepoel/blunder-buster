@@ -7,6 +7,7 @@ import { getCachedAnalysis, cacheAnalysis, local } from '../utils/storage.js';
 import { ChessBoard }                     from './board.js';
 import { EvalBar }                        from './eval-bar.js';
 import { MoveList }                       from './move-list.js';
+import { CoachPanel }                     from './coach.js';
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
@@ -55,9 +56,14 @@ const deviationBanner = $('deviation-banner');
 
 // ── Components ────────────────────────────────────────────────────────────────
 
-const board    = new ChessBoard(canvas, { onMove: handleUserMove });
-const evalBar  = new EvalBar($('eval-bar-container'));
-const moveList = new MoveList($('move-list'), handleMoveClick);
+const board      = new ChessBoard(canvas, { onMove: handleUserMove });
+const evalBar    = new EvalBar($('eval-bar-container'));
+const moveList   = new MoveList($('move-list'), handleMoveClick);
+const coachPanel = new CoachPanel(
+  $('coach-panel'),
+  () => local.getSettings().then(s => s.claudeApiKey ?? ''),
+  () => state.gameId,
+);
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 
@@ -118,9 +124,9 @@ async function loadGame(gameId, username, gameYearMonth = null) {
   showAnalysisUI();
   setStatus('Fetching game…');
 
-  // Check cache first
+  // Check cache first — discard entries from older schema versions
   const cached = await getCachedAnalysis(gameId);
-  if (cached) {
+  if (cached && cached.schemaVersion === 2) {
     buildChessInstances(cached.pgn);
     const h = cached.headers ?? {};
     populateHeader(
@@ -210,6 +216,7 @@ function buildChessInstances(pgn) {
 
 function applyAnalysisResult(result) {
   state.analysis = result;
+  coachPanel.clear();
 
   // Update headers
   elOpening.textContent = result.opening ?? '';
@@ -234,6 +241,18 @@ function goToIndex(idx) {
   clearDeviation();
   refreshBoard();
   moveList.setCurrentIndex(state.currentIndex);
+
+  if (state.currentIndex >= 0 && state.analysis) {
+    const moveData     = state.analysis.moves[state.currentIndex];
+    const chessForCoach = state.chessInstances[state.currentIndex] ?? null; // position before the move
+    if (moveData && chessForCoach) {
+      coachPanel.show(moveData, chessForCoach, state.analysis.headers ?? {});
+    } else {
+      coachPanel.clear();
+    }
+  } else {
+    coachPanel.clear();
+  }
 }
 
 function refreshBoard() {
@@ -253,7 +272,7 @@ function refreshBoard() {
   // Eval bar
   if (state.analysis && state.currentIndex >= 0) {
     const m = state.analysis.moves[state.currentIndex];
-    if (m) evalBar.update(m.evalAfter, false, board.flipped);
+    if (m) evalBar.update(m.evalAfter, m.isMateAfter ?? false, board.flipped);
   } else if (state.analysis && state.currentIndex === -1) {
     const firstEval = state.analysis.moves[0]?.evalBefore ?? 0;
     evalBar.update(firstEval, false, board.flipped);
@@ -366,6 +385,22 @@ function bindControls() {
   $('btn-return-to-game').addEventListener('click', () => {
     clearDeviation();
     refreshBoard();
+  });
+
+  // Settings panel
+  const settingsPanel  = $('settings-panel');
+  const apiKeyInput    = $('api-key-input');
+  $('btn-settings').addEventListener('click', async () => {
+    const isOpen = settingsPanel.classList.toggle('open');
+    if (isOpen) {
+      const { claudeApiKey } = await local.getSettings();
+      apiKeyInput.value = claudeApiKey ?? '';
+      apiKeyInput.focus();
+    }
+  });
+  $('btn-save-settings').addEventListener('click', async () => {
+    await local.saveSettings({ claudeApiKey: apiKeyInput.value.trim() });
+    settingsPanel.classList.remove('open');
   });
 
   // Keyboard navigation

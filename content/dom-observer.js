@@ -13,11 +13,16 @@
  */
 function observeGameEnd(onGameOver) {
   let fired = false;
+  let lastGameId = extractGameId(window.location.pathname);
 
   function notify() {
     if (fired) return;
     fired = true;
     onGameOver();
+  }
+
+  function reset() {
+    fired = false;
   }
 
   // Strategy 1: watch for the result modal/overlay appearing in the DOM.
@@ -68,9 +73,14 @@ function observeGameEnd(onGameOver) {
   const originalReplaceState = history.replaceState.bind(history);
 
   function onNavigate(url) {
-    if (/\/game\/(live|computer|daily)\/\d+/.test(url)) {
-      // Small delay so chess.com can finish rendering
-      setTimeout(notify, 800);
+    const newId = extractGameId(url);
+    // Only trigger when navigating to a *different* game — chess.com also fires
+    // pushState for move-by-move navigation within the same game review, which
+    // must not be treated as a new game.
+    if (newId && newId !== lastGameId) {
+      lastGameId = newId;
+      reset();
+      setTimeout(notify, 1500);
     }
   }
 
@@ -85,12 +95,15 @@ function observeGameEnd(onGameOver) {
 
   window.addEventListener('popstate', () => onNavigate(window.location.href));
 
-  // Check immediately in case we loaded directly onto a finished game page
+  // Check immediately in case we loaded directly onto a finished game page.
+  // Fire unconditionally — chess.com's review page doesn't reliably render result
+  // text within a fixed timeout. If the game is still in progress the API fetch
+  // will simply return not-found; that is handled gracefully by the side panel.
   if (/\/game\/(live|computer|daily)\/\d+/.test(window.location.pathname)) {
-    setTimeout(() => {
-      if (resultPattern.test(document.body?.textContent ?? '')) notify();
-    }, 1500);
+    setTimeout(notify, 1500);
   }
+
+  return { reset };
 }
 
 /**

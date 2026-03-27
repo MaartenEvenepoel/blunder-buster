@@ -37,7 +37,8 @@ const T = {
   MISTAKE_MAX_LOSS:    20,
   MISS_WINNING:        60,   // was winning above this
   MISS_LOSING:         40,   // now losing below this
-  BRILLIANT_MIN_GAIN:   5,   // mover's win% must increase by this much
+  BRILLIANT_MIN_GAIN:   5,   // mover's win% must increase by this much (sacrifice)
+  GREAT_MIN_GAIN:       3,   // mover's win% must increase by this much (any best move)
 };
 
 /**
@@ -77,6 +78,9 @@ export function classifyMove({ color, winPctBefore, winPctAfter, playedUci, best
   if (isBestMove) {
     if (isSacrifice && (moverAfter - moverBefore) >= T.BRILLIANT_MIN_GAIN) {
       return 'Brilliant';
+    }
+    if ((moverAfter - moverBefore) >= T.GREAT_MIN_GAIN) {
+      return 'Great';   // best move that actively improves the position
     }
     return 'Best';
   }

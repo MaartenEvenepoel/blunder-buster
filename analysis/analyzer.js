@@ -75,12 +75,12 @@ class StockfishEngine {
       };
 
       this._handlers.add(handler);
-      this._send('ucinewgame');
       this._send(`position fen ${fen}`);
       this._send(`go depth ${depth}`);
     });
   }
 
+  newGame()   { this._send('ucinewgame'); }
   stop()      { this._send('stop'); }
   terminate() { this._send('quit'); this._worker.terminate(); }
 }
@@ -120,12 +120,18 @@ export async function analyzeGame(pgn, Chess, {
   let rawEvals;
 
   if (hasPgnEvals) {
+    // PGN evals give accurate scores but no best-move data, so Best / Brilliant / Great
+    // would never be assigned. Run Stockfish at reduced depth on the pre-move positions
+    // only (excludes the final position) to get bestMove, and use PGN scores for evals.
+    const beforePositions = positions.slice(0, -1);
+    const sfBestMoves = await runStockfishAnalysis(beforePositions, 14, signal, onProgress, moves);
+
     rawEvals = [
-      { score: 0, isMate: false, bestMove: null },
-      ...moves.map(m => ({
-        score:    m.pgnIsMate ? m.pgnEval * 100 : Math.round(m.pgnEval * 100),
+      { score: 0, isMate: false, bestMove: sfBestMoves[0]?.bestMove ?? null },
+      ...moves.map((m, i) => ({
+        score:    m.pgnIsMate ? m.pgnEval : Math.round(m.pgnEval * 100),
         isMate:   m.pgnIsMate,
-        bestMove: null,
+        bestMove: sfBestMoves[i + 1]?.bestMove ?? null,
       })),
     ];
   } else {
@@ -162,6 +168,7 @@ export async function analyzeGame(pgn, Chess, {
       fenAfter:   move.fenAfter,
       evalBefore,
       evalAfter,
+      isMateAfter: rawEvals[i + 1].isMate,
       winPctBefore,
       winPctAfter,
       bestUci,
@@ -190,7 +197,8 @@ export async function analyzeGame(pgn, Chess, {
     moves:         movesData,
     whiteAccuracy: computeAccuracy(movesData, 'w'),
     blackAccuracy: computeAccuracy(movesData, 'b'),
-    analyzedWith:  hasPgnEvals ? 'pgn-evals' : 'stockfish',
+    analyzedWith:  hasPgnEvals ? 'hybrid' : 'stockfish',
+    schemaVersion: 2,
   };
 }
 
@@ -209,6 +217,7 @@ export async function analyzePosition(fen, depth = 16, signal = null) {
   try {
     await engine._readyPromise;
     if (signal?.aborted) return null;
+    engine.newGame();
 
     return await new Promise((resolve, reject) => {
       if (signal) {
@@ -224,26 +233,46 @@ export async function analyzePosition(fen, depth = 16, signal = null) {
 // ── Stockfish evaluation loop ─────────────────────────────────────────────────
 
 async function runStockfishAnalysis(positions, depth, signal, onProgress, moves) {
-  const engine = new StockfishEngine();
-  await engine._readyPromise;
+  const WORKERS   = 2;
+  const perWorker = Math.ceil(positions.length / WORKERS);
+  const results   = new Array(positions.length).fill(null);
+  let   completed = 0;
 
-  const rawEvals = [];
+  const runChunk = async (startIdx, chunk) => {
+    const engine = new StockfishEngine();
+    if (signal) signal.addEventListener('abort', () => engine.stop(), { once: true });
 
-  for (let i = 0; i < positions.length; i++) {
-    if (signal?.aborted) break;
+    try {
+      await engine._readyPromise;
+      engine.newGame(); // clean TT at chunk start; reuse within chunk for ~20% extra gain
 
-    onProgress?.({
-      current: i,
-      total:   positions.length,
-      san:     i > 0 ? moves[i - 1]?.san : null,
-    });
+      for (let i = 0; i < chunk.length; i++) {
+        if (signal?.aborted) break;
 
-    const result = await engine.evaluate(positions[i], depth);
-    rawEvals.push(result);
+        const result = await engine.evaluate(chunk[i], depth);
+        results[startIdx + i] = result;
+        completed++;
+
+        onProgress?.({
+          current: completed,
+          total:   positions.length,
+          san:     (startIdx + i) > 0 ? moves[startIdx + i - 1]?.san : null,
+        });
+      }
+    } finally {
+      engine.terminate();
+    }
+  };
+
+  const chunkPromises = [];
+  for (let w = 0; w < WORKERS; w++) {
+    const start = w * perWorker;
+    if (start >= positions.length) break;
+    chunkPromises.push(runChunk(start, positions.slice(start, Math.min(start + perWorker, positions.length))));
   }
 
-  engine.terminate();
-  return rawEvals;
+  await Promise.all(chunkPromises);
+  return results;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

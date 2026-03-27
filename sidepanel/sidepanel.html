@@ -60,6 +60,26 @@
       <button class="ctrl-btn" id="btn-next"   title="Next move">&#x23F5;</button>
       <button class="ctrl-btn" id="btn-end"    title="Go to end">&#x23ED;</button>
       <button class="ctrl-btn" id="btn-flip"   title="Flip board">&#x21C5; Flip</button>
+      <button class="ctrl-btn" id="btn-settings" title="Settings" style="margin-left:auto;">&#x2699;</button>
+    </div>
+
+    <!-- Settings drawer (hidden by default) -->
+    <div id="settings-panel">
+      <div class="settings-row">
+        <label for="api-key-input">Gemini API key</label>
+        <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Get a free key</a>
+      </div>
+      <input type="password" id="api-key-input" placeholder="sk-ant-…" autocomplete="off" spellcheck="false" />
+      <button id="btn-save-settings">Save</button>
+    </div>
+
+    <!-- Coach panel -->
+    <div id="coach-panel">
+      <div class="coach-header">
+        <span id="coach-name">Buster</span>
+        <span id="coach-ai-badge">AI</span>
+      </div>
+      <p id="coach-text"></p>
     </div>
 
     <!-- Move list -->
