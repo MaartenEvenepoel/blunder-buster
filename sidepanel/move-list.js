@@ -153,7 +153,8 @@ export class MoveList {
     badge.className = 'move-badge';
     badge.title     = style.label;
     badge.textContent = style.symbol;
-    badge.style.color = style.color;
+    badge.style.backgroundColor = style.bg;
+    badge.style.color = style.fg;
     return badge;
   }
 }

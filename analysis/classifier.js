@@ -112,16 +112,17 @@ export function computeAccuracy(movesData, color) {
 
 /**
  * Badge styling data for each classification.
+ * bg: pill background color  fg: text color inside the pill
  */
 export const BADGE_STYLES = {
-  Brilliant:  { color: '#1baca6', symbol: '!!', label: 'Brilliant' },
-  Great:      { color: '#5c8bb0', symbol: '!',  label: 'Great move' },
-  Best:       { color: '#96bc4b', symbol: '★',  label: 'Best move' },
-  Excellent:  { color: '#96bc4b', symbol: '✓',  label: 'Excellent' },
-  Good:       { color: '#97af8b', symbol: '✓',  label: 'Good' },
-  Inaccuracy: { color: '#f0c15c', symbol: '?!', label: 'Inaccuracy' },
-  Mistake:    { color: '#e07b3c', symbol: '?',  label: 'Mistake' },
-  Blunder:    { color: '#ca3431', symbol: '??', label: 'Blunder' },
-  Miss:       { color: '#ca3431', symbol: '✗',  label: 'Miss' },
-  Book:       { color: '#a88865', symbol: '📖', label: 'Book move' },
+  Brilliant:  { bg: '#1baca6', fg: '#fff', symbol: '!!', label: 'Brilliant — sacrifice that gains advantage' },
+  Great:      { bg: '#5c8bb0', fg: '#fff', symbol: '!',  label: 'Great — best move that improves your position' },
+  Best:       { bg: '#7ab32a', fg: '#fff', symbol: '★',  label: 'Best — engine\'s top choice' },
+  Excellent:  { bg: '#4a9e6a', fg: '#fff', symbol: '☆',  label: 'Excellent — near-optimal, not the engine\'s top move' },
+  Good:       { bg: '#7a9e6e', fg: '#fff', symbol: '+',  label: 'Good — solid move with a minor imprecision' },
+  Inaccuracy: { bg: '#c9971e', fg: '#fff', symbol: '?!', label: 'Inaccuracy — slightly imprecise' },
+  Mistake:    { bg: '#e07b3c', fg: '#fff', symbol: '?',  label: 'Mistake' },
+  Blunder:    { bg: '#ca3431', fg: '#fff', symbol: '??', label: 'Blunder' },
+  Miss:       { bg: '#8b1a1a', fg: '#fff', symbol: '✗',  label: 'Miss — threw away a winning position' },
+  Book:       { bg: '#7a5c3a', fg: '#fff', symbol: '≡',  label: 'Book move — opening theory' },
 };

@@ -252,16 +252,16 @@ export class ChessBoard {
 
   _drawClassificationBadge(sz) {
     const BADGE = {
-      brilliant:  { bg: '#1baca6', icon: 'double_exclaim' },
-      great:      { bg: '#5c8bb0', icon: 'exclaim'        },
-      best:       { bg: '#96bc4b', icon: 'check'          },
-      excellent:  { bg: '#96bc4b', icon: 'check'          },
-      good:       { bg: '#96bc4b', icon: 'check_thin'     },
-      inaccuracy: { bg: '#f0c040', icon: 'question_exclaim' },
-      mistake:    { bg: '#e87b1e', icon: 'question'       },
-      blunder:    { bg: '#c73232', icon: 'double_question' },
-      miss:       { bg: '#c73232', icon: 'cross'          },
-      book:       { bg: '#a97c50', icon: 'book'           },
+      brilliant:  { bg: '#1baca6', icon: 'double_exclaim'  },
+      great:      { bg: '#5c8bb0', icon: 'exclaim'         },
+      best:       { bg: '#7ab32a', icon: 'star_filled'     },
+      excellent:  { bg: '#4a9e6a', icon: 'star_outline'    },
+      good:       { bg: '#7a9e6e', icon: 'plus'            },
+      inaccuracy: { bg: '#c9971e', icon: 'question_exclaim' },
+      mistake:    { bg: '#e07b3c', icon: 'question'        },
+      blunder:    { bg: '#ca3431', icon: 'double_question'  },
+      miss:       { bg: '#8b1a1a', icon: 'cross'           },
+      book:       { bg: '#7a5c3a', icon: 'lines'           },
     };
 
     const style = BADGE[this._classification?.toLowerCase()];
@@ -301,22 +301,38 @@ export class ChessBoard {
 
     switch (icon) {
 
-      case 'check': {
+      case 'star_filled': {
+        this._drawStar(ctx, bx, by, r, true, lw);
+        break;
+      }
+
+      case 'star_outline': {
+        this._drawStar(ctx, bx, by, r, false, lw);
+        break;
+      }
+
+      case 'plus': {
+        const arm = r * 0.40;
+        ctx.lineWidth = Math.max(1, r * 0.22);
+        ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.moveTo(bx - r * 0.42, by + r * 0.04);
-        ctx.lineTo(bx - r * 0.08, by + r * 0.40);
-        ctx.lineTo(bx + r * 0.46, by - r * 0.34);
+        ctx.moveTo(bx - arm, by); ctx.lineTo(bx + arm, by);
+        ctx.moveTo(bx, by - arm); ctx.lineTo(bx, by + arm);
         ctx.stroke();
         break;
       }
 
-      case 'check_thin': {
-        ctx.lineWidth = Math.max(1, r * 0.14);
-        ctx.beginPath();
-        ctx.moveTo(bx - r * 0.42, by + r * 0.04);
-        ctx.lineTo(bx - r * 0.08, by + r * 0.40);
-        ctx.lineTo(bx + r * 0.46, by - r * 0.34);
-        ctx.stroke();
+      case 'lines': {
+        const lineLen = r * 0.50;
+        const lw2 = Math.max(1, r * 0.14);
+        ctx.lineWidth = lw2;
+        ctx.lineCap = 'round';
+        for (const dy of [-r * 0.24, 0, r * 0.24]) {
+          ctx.beginPath();
+          ctx.moveTo(bx - lineLen, by + dy);
+          ctx.lineTo(bx + lineLen, by + dy);
+          ctx.stroke();
+        }
         break;
       }
 
@@ -383,9 +399,28 @@ export class ChessBoard {
         break;
       }
 
-      case 'book':
-        this._drawBookIcon(ctx, bx, by, r);
-        break;
+    }
+  }
+
+  // Draws a 5-pointed star; filled=true for ★, false for ☆
+  _drawStar(ctx, cx, cy, r, filled, lw) {
+    const outerR = r * 0.58;
+    const innerR = r * 0.24;
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) {
+      const angle = (i * Math.PI / 5) - Math.PI / 2;
+      const rad   = i % 2 === 0 ? outerR : innerR;
+      const x = cx + rad * Math.cos(angle);
+      const y = cy + rad * Math.sin(angle);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    if (filled) {
+      ctx.fill();
+    } else {
+      ctx.lineWidth = Math.max(1, lw * 0.8);
+      ctx.stroke();
     }
   }
 
@@ -411,59 +446,6 @@ export class ChessBoard {
     ctx.beginPath();
     ctx.arc(bx, by + r * 0.38, lw * 0.55, 0, Math.PI * 2);
     ctx.fill();
-  }
-
-  // Draws an open-book icon
-  _drawBookIcon(ctx, bx, by, r) {
-    const top    = by - r * 0.40;
-    const bot    = by + r * 0.42;
-    const spine  = bx;
-    const lEdge  = bx - r * 0.50;
-    const rEdge  = bx + r * 0.50;
-    const lTop   = top + r * 0.10;   // left page starts slightly lower (perspective)
-    const rTop   = top + r * 0.10;
-
-    ctx.lineWidth = Math.max(1, r * 0.11);
-
-    // Left page (slightly opaque fill)
-    ctx.beginPath();
-    ctx.moveTo(spine, top);
-    ctx.lineTo(lEdge, lTop);
-    ctx.lineTo(lEdge, bot);
-    ctx.lineTo(spine, bot);
-    ctx.closePath();
-    ctx.globalAlpha = 0.85;
-    ctx.fill();
-    ctx.globalAlpha = 1.0;
-    ctx.stroke();
-
-    // Right page (slightly less opaque to create depth)
-    ctx.beginPath();
-    ctx.moveTo(spine, top);
-    ctx.lineTo(rEdge, rTop);
-    ctx.lineTo(rEdge, bot);
-    ctx.lineTo(spine, bot);
-    ctx.closePath();
-    ctx.globalAlpha = 0.65;
-    ctx.fill();
-    ctx.globalAlpha = 1.0;
-    ctx.stroke();
-
-    // Horizontal lines on left page (like text lines)
-    ctx.lineWidth = Math.max(0.5, r * 0.07);
-    ctx.globalAlpha = 0.5;
-    const lineGap = (bot - lTop) * 0.27;
-    for (let i = 1; i <= 3; i++) {
-      const ly  = lTop + lineGap * i;
-      const frac = (ly - lTop) / (bot - lTop);
-      const x0 = spine  + (lEdge  - spine)  * frac * 0.6 + (lEdge  - spine)  * 0.25;
-      const x1 = spine  + (lEdge  - spine)  * frac * 0.6 + (lEdge  - spine)  * 0.75;
-      ctx.beginPath();
-      ctx.moveTo(x0, ly);
-      ctx.lineTo(x1, ly);
-      ctx.stroke();
-    }
-    ctx.globalAlpha = 1.0;
   }
 
   // ── Drag and drop ───────────────────────────────────────────────────────────
