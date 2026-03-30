@@ -8,7 +8,7 @@ A Chromium browser extension that analyses your chess.com games with a local Sto
 
 When a game finishes on chess.com the extension automatically opens a side panel, fetches the game, runs it through Stockfish, and shows you a move-by-move breakdown with accuracy scores, move classifications, an evaluation bar, and a best-move arrow. You can also navigate freely through the game and branch off into alternative lines to explore what you should have played instead.
 
-![Blunder Buster side panel showing a completed game analysis](docs/screenshot.png)
+![Blunder Buster side panel showing a completed game analysis](docs/preview.png)
 
 ---
 
